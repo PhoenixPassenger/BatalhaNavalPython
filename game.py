@@ -154,7 +154,7 @@ class Game:
 	def anythingLeft(self, d):
 	    newList = []
 	    def myprint(d):
-	        for k, v in d.iteritems():
+	        for k, v in d.items():
 	            if isinstance(v, dict):
 	              myprint(v)
 	            else:

@@ -1,32 +1,30 @@
 import socket
 import ast
 import sys
-
+import pickle
 class Client:
 	
 	def __init__(self):
 		self.sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 		self.addr = []
 		self.connected = False
-		ip = int(input('IP?\n'))
+		ip = str(input('IP?\n'))
 		port = int(input('Porta?\n'))
 	
 		self.connect(ip, port)
 
 	def sendMessage(self, m):
-		self.sock.sendto(str(m), (self.addr[0], self.addr[1]))
+		self.sock.sendto(pickle.dumps(m), (self.addr[0], self.addr[1]))
 
-	def toList(self, s):
-		l = ast.literal_eval(s)
-		return l
 
 	def connect(self, ip, port):
 	
 		message = 'connect'
-		self.sock.sendto(message, (ip, int(port)))
+		self.sock.sendto(pickle.dumps(message), (ip, int(port)))
 		
 		while self.connected == False:
 			data, self.addr = self.sock.recvfrom(1024)
+			data =pickle.loads(data)
 			if isinstance(self.addr, tuple) and data == 'conectado':
 				if self.addr[0] == ip:
 					self.connected = True
@@ -43,22 +41,24 @@ class Client:
 		while data != 'gameDone': #waits for the 'gameDone' message from the correct ip
 			print ('Pera...')
 			data, self.addr = self.sock.recvfrom(2048) # buffer size is 2048 bytes
+			data = pickle.loads(data)
 			if data != '':
-				dataList = self.toList(data)
+				dataList = data
 				if dataList[0] == 'selectCell':
 					g.clear()
 					g.p2.field.field = dataList[1]
-					print ('Teu campo:\n')
+					print('Teu campo:\n')
 					print(g.printfield(g.p2.field.field))
-					print ('\nCampo do cara:\n')
+					print('\nCampo do cara:\n')
 					print(g.printfield(g.p2.bombfield.field))
 					cell = g.selectCell(g.p2)
 					self.sendMessage(['cell', cell])
 
 					while data != 'result': #waits for the 'result' message from the correct ip
 						data, self.addr = self.sock.recvfrom(1024) # buffer size is 1024 bytes
+						data = pickle.loads(data)
 						if data != '':
-							dataList = self.toList(data)
+							dataList = data
 							data = dataList[0]
 							if data == 'resultado':
 								g.clear()

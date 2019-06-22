@@ -3,7 +3,7 @@ import ast
 import sys
 import threading
 import player
-
+import pickle
 
 class Server:
 
@@ -11,40 +11,41 @@ class Server:
 		self.threads = []
 
 		self.ip = socket.gethostbyname(socket.gethostname())
-		self.port = 5005
+		self.port = 12345
 		self.sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 		self.sock.bind((self.ip, self.port))
 		self.addr = []
-		self.connected = False
+		self.connected =  False
 		self.serverDone = False
 		self.clientDone = False
 
 		print("Seu IP: " + self.ip + " e porta: " + str(self.port))
 
 	def sendMessage(self, m):
-		self.sock.sendto(str(m), (self.addr[0], self.addr[1]))
+		self.sock.sendto(pickle.dumps(m), (self.addr[0], self.addr[1]))
 
 	def waitForClient(self):
+
 		data = ''
 		while len(self.addr) == 0 or data != 'done':
 			data, self.addr = self.sock.recvfrom(4096)
+			data = pickle.loads(data)
 			
 			if data != '':
-				dataList = self.toList(data)
+				dataList = data
 				data = dataList[0]
 				self.enemyField = dataList[1]
 				self.enemyName = dataList[2]
 		
 		self.clientDone = True
 
-	def toList(self, s):
-		l = ast.literal_eval(s)
-		return l
+
 
 	def connect(self):
 
 		while len(self.addr) == 0 or data != 'connect':
 			data, self.addr = self.sock.recvfrom(1024)
+			data = pickle.loads(data)
 
 		print(str(self.addr[0]) + ' conectado')
 		self.connected = True
@@ -63,7 +64,8 @@ class Server:
 		
 		g.clear()
 
-		self.threads[0]._Thread__stop()
+		self.threads[0] = None
+		thread = None
 		if self.clientDone == False:
 			print('Esperando...')
 			self.waitForClient()
@@ -103,8 +105,9 @@ class Server:
 				print('Esperando...')
 				while len(self.addr) == 0 or data != 'cell':
 					data, self.addr = self.sock.recvfrom(2048)
+					data=pickle.loads(data)
 					if data != '':
-						dataList = self.toList(data)
+						dataList = data
 						data = dataList[0]
 						cell = dataList[1]
 
