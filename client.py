@@ -33,12 +33,12 @@ class Client:
 		
 
 		import game
-		g = game.Game() #Starts the game
+		g = game.Game()
 		g.p2 = g.newPlayer(2, g.ships[:], g.p2Field, g.p2BombField)
 
 		self.sendMessage(['done', g.p2.field.field, g.p2.name])
 
-		while data != 'gameDone': #waits for the 'gameDone' message from the correct ip
+		while data != 'gameDone':
 			print ('Pera...')
 			data, self.addr = self.sock.recvfrom(2048)
 			data = pickle.loads(data)
@@ -54,7 +54,7 @@ class Client:
 					else:
 						data = 'gameDone'
 						print (dataList[1])
-						sys.exit() #Exit the application
+						sys.exit()
 
 				elif dataList[0] == 'selectCell':
 					g.clear()

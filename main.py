@@ -4,7 +4,7 @@ while mode != 'l' and mode != 'n':
     mode = input('[l] Local ou [n] Network?\n');
 
 
-### CREATE PLAYERS ###
+
 if mode == 'l':
     import game
 

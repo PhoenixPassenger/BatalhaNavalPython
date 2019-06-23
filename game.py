@@ -64,14 +64,13 @@ class Game:
             text += "\n" + spacing.format(v, f['A'][v], f['B'][v], f['C'][v], f['D'][v], f['E'][v], f['F'][v],
                                           f['G'][v], f['H'][v], f['I'][v], f['J'][v], f['K'][v], f['L'][v], f['M'][v],
                                           f['N'][
-                                              v])  # Adds all the rows with the row number to the left and a spacing of 2
+                                              v])
 
         return text
 
     def placeShips(self, player):
         counter = 1
 
-        ### PLAYER INSTRUCTIONS ###
         print(player.name + ", coloque seus navios na posição inicial,\n")
         print("Depois diga a direção (right, left, up ou down)\n")
 
@@ -98,45 +97,47 @@ class Game:
 
             newrow = row
             newcolumn = column
+            if len(x.parts)==1:
+                pff[newcolumn][newrow] = True
+            else:
+                while (
+                        direction != "right" and direction != "left" and direction != "up" and direction != "down") or self.rowExist(
+                        newrow) == False or self.columnExist(newcolumn) == False or cellBusy == True:
+                    direction = input(player.name + ", qual direção (right, left, up or down) seu barco " + nth[
+                        counter] + " está virado?\n")
+                    cellBusy = False
+                    partCounter = 0
 
-            while (
-                    direction != "right" and direction != "left" and direction != "up" and direction != "down") or self.rowExist(
-                    newrow) == False or self.columnExist(newcolumn) == False or cellBusy == True:  # loop until the user enters a valid direction
-                direction = input(player.name + ", qual direção (right, left, up or down) seu barco " + nth[
-                    counter] + " está virado?\n")
-                cellBusy = False
-                partCounter = 0
+                    for y in range(len(x.parts)):
+                        newcolumn = column
+                        newrow = row
+                        if (direction == "down"):
+                            newrow = row + partCounter
 
-                for y in range(len(x.parts)):
-                    newcolumn = column
-                    newrow = row
-                    if (direction == "down"):
-                        newrow = row + partCounter
+                        elif (direction == "up"):
+                            newrow = row - partCounter
 
-                    elif (direction == "up"):
-                        newrow = row - partCounter
+                        elif (direction == "left"):
+                            newcolumn = chr(ord(column) - partCounter)
 
-                    elif (direction == "left"):
-                        newcolumn = chr(ord(column) - partCounter)
+                        elif (direction == "right"):
+                            newcolumn = chr(ord(column) + partCounter)
 
-                    elif (direction == "right"):
-                        newcolumn = chr(ord(column) + partCounter)
+                        partCounter += 1
+                        if self.columnExist(newcolumn) and self.rowExist(newrow):
+                            if pff[newcolumn][newrow] == True:
+                                cellBusy = pff[newcolumn][newrow]
 
-                    partCounter += 1
-                    if self.columnExist(newcolumn) and self.rowExist(newrow):
-                        if pff[newcolumn][newrow] == True:  # is the cell busy?
-                            cellBusy = pff[newcolumn][newrow]
-
-                        elif pff[newcolumn][newrow] == False and partCounter == len(x.parts):
-                            for p in range(0, partCounter):
-                                if (ord(newcolumn) < ord(column)):
-                                    pff[chr(ord(column) - p)][newrow] = True
-                                elif (ord(newcolumn) > ord(column)):
-                                    pff[chr(ord(column) + p)][newrow] = True
-                                elif (newrow < row):
-                                    pff[newcolumn][newrow + p] = True
-                                elif (newrow > row):
-                                    pff[newcolumn][newrow - p] = True
+                            elif pff[newcolumn][newrow] == False and partCounter == len(x.parts):
+                                for p in range(0, partCounter):
+                                    if (ord(newcolumn) < ord(column)):
+                                        pff[chr(ord(column) - p)][newrow] = True
+                                    elif (ord(newcolumn) > ord(column)):
+                                        pff[chr(ord(column) + p)][newrow] = True
+                                    elif (newrow < row):
+                                        pff[newcolumn][newrow + p] = True
+                                    elif (newrow > row):
+                                        pff[newcolumn][newrow - p] = True
 
             self.clear()
             print(self.printfield(player.field.field))
@@ -238,7 +239,7 @@ class Game:
                     print('Errou de novo pora!')
                 else:
                     print(self.result)
-                    sys.exit()  # Exit the application
+                    sys.exit()
 
                 input('Aperta enter parça')
                 self.clear()
