@@ -7,3 +7,4 @@ class Bombfield:
 			for j in range(1, cellNumber + 1):
 				k = {j:False}
 				self.field[chr(code)][j] = ""
+

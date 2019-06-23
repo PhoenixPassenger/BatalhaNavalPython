@@ -7,117 +7,114 @@ import pickle
 
 class Server:
 
-	def __init__(self):
-		self.threads = []
+    def __init__(self):
+        self.threads = []
 
-		self.ip = socket.gethostbyname(socket.gethostname())
-		self.port = 12345
-		self.sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
-		self.sock.bind((self.ip, self.port))
-		self.addr = []
-		self.connected =  False
-		self.serverDone = False
-		self.clientDone = False
-
-		print("Seu IP: " + self.ip + " e porta: " + str(self.port))
-
-	def sendMessage(self, m):
-		self.sock.sendto(pickle.dumps(m), (self.addr[0], self.addr[1]))
-
-	def waitForClient(self):
-
-		data = ''
-		while len(self.addr) == 0 or data != 'done':
-			data, self.addr = self.sock.recvfrom(4096)
-			data = pickle.loads(data)
-			
-			if data != '':
-				dataList = data
-				data = dataList[0]
-				self.enemyField = dataList[1]
-				self.enemyName = dataList[2]
-		
-		self.clientDone = True
+        self.ip = socket.gethostbyname(socket.gethostname())
+        self.port = 12345
+        self.sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+        self.sock.bind((self.ip, self.port))
+        self.addr = []
+        self.connected = False
+        self.serverDone = False
+        self.clientDone = False
 
 
+        print("Seu IP: " + self.ip + " e porta: " + str(self.port))
 
-	def connect(self):
+    def sendMessage(self, m):
+        self.sock.sendto(pickle.dumps(m), (self.addr[0], self.addr[1]))
 
-		while len(self.addr) == 0 or data != 'connect':
-			data, self.addr = self.sock.recvfrom(1024)
-			data = pickle.loads(data)
+    def waitForClient(self):
 
-		print(str(self.addr[0]) + ' conectado')
-		self.connected = True
+        data = ''
+        while len(self.addr) == 0 or 'done' not in data:
+            data, self.addr = self.sock.recvfrom(4096)
+            data = pickle.loads(data)
 
-		self.sendMessage('conectado')
+            if data != '':
+                dataList = data
+                data = dataList[0]
+                self.enemyField = dataList[1]
+                self.enemyName = dataList[2]
+
+        self.clientDone = True
+
+    def connect(self):
+
+        while len(self.addr) == 0 or data != 'connect':
+            data, self.addr = self.sock.recvfrom(1024)
+            data = pickle.loads(data)
+
+        print(str(self.addr[0]) + ' conectado')
+        self.connected = True
+
+        self.sendMessage('conectado')
 
 
-		thread = threading.Thread(target=self.waitForClient)
-		thread.start()
-		self.threads.append(thread)
+        thread = threading.Thread(target=self.waitForClient)
+        thread.start()
+        self.threads.append(thread)
 
-		import game
-		g = game.Game()
-		g.p1 = g.newPlayer(1, g.ships[:], g.p1Field, g.p1BombField)
-		self.done = True
-		
-		g.clear()
+        import game
+        g = game.Game()
+        g.p1 = g.newPlayer(1, g.ships[:], g.p1Field, g.p1BombField)
+        self.done = True
 
-		self.threads[0] = None
-		thread = None
-		if self.clientDone == False:
-			print('Esperando...')
-			self.waitForClient()
-		
-		print ('Cliente')
+        g.clear()
+        thread.join()
 
-		g.p2Field.field = self.enemyField
-		g.p2 = player.Player(self.enemyName, g.ships[:], g.p2Field, g.p2BombField)
+        if self.clientDone == False:
+            print('Esperando...')
+            self.waitForClient()
+        print ('Cliente')
 
-		while g.anythingLeft(g.p1.field.field) and g.anythingLeft(g.p2.field.field):
-			g.clear()
-			print('Seu campo:\n')
-			print(g.printfield(g.p1.field.field))
-			print ('\nCampo do inimigo:\n')
-			print(g.printfield(g.p1.bombfield.field))
-			cell = g.selectCell(g.p1)
-			g.bomb(g.p1, g.p2, cell[0], cell[1])
-			g.clear()
+        g.p2Field.field = self.enemyField
+        g.p2 = player.Player(self.enemyName, g.ships[:], g.p2Field, g.p2BombField)
 
-			if g.result == 'X':
-				print ('Acertou, mizeravi!')
-			elif g.result == 'O':
-				print ('Erroooooou!')
-			else:
-				print (g.result)
-				self.sendMessage(['resultado', g.result])
-				sys.exit()
+        while g.anythingLeft(g.p1.field.field) and g.anythingLeft(g.p2.field.field):
+            g.clear()
+            print('Seu campo:\n')
+            print(g.printfield(g.p1.field.field))
+            print ('\nCampo do inimigo:\n')
+            print(g.printfield(g.p1.bombfield.field))
+            cell = g.selectCell(g.p1)
+            g.bomb(g.p1, g.p2, cell[0], cell[1])
+            g.clear()
 
-			print('Seu campo:\n')
-			print(g.printfield(g.p1.field.field))
-			print('\nCampo do inimigo :\n')
-			print(g.printfield(g.p1.bombfield.field))
+            if g.result == 'X':
+                print ('Acertou, mizeravi!')
+            elif g.result == 'O':
+                print ('Erroooooou!')
+            else:
+                print(g.result)
+                self.sendMessage(['resultado', g.result])
+                sys.exit()
 
-			if g.anythingLeft(g.p1.field.field) and g.anythingLeft(g.p2.field.field):
-				self.sendMessage(['selectCell', g.p2.field.field])
-				data = ''
-				print('Esperando...')
-				while len(self.addr) == 0 or data != 'cell':
-					data, self.addr = self.sock.recvfrom(2048)
-					data=pickle.loads(data)
-					if data != '':
-						dataList = data
-						data = dataList[0]
-						cell = dataList[1]
+            print('Seu campo:\n')
+            print(g.printfield(g.p1.field.field))
+            print('\nCampo do inimigo :\n')
+            print(g.printfield(g.p1.bombfield.field))
 
-				g.bomb(g.p2, g.p1, cell[0], cell[1])
-				
-				if g.result == 'X' or g.result == 'O':
-					self.sendMessage(['resultado', g.result])
-				else:
-					print (g.result)
-					self.sendMessage(['resultado', g.result])
-					sys.exit()
+            if g.anythingLeft(g.p1.field.field) and g.anythingLeft(g.p2.field.field):
+                self.sendMessage(['selectCell', g.p2.field.field])
+                data = ''
+                print('Esperando...')
+                while len(self.addr) == 0 or 'cell' not in data:
+                    data, self.addr = self.sock.recvfrom(2048)
+                    data=pickle.loads(data)
+                    if data != '':
+                        dataList = data
+                        data = dataList[0]
+                        cell = dataList[1]
+
+                g.bomb(g.p2, g.p1, cell[0], cell[1])
+
+                if g.result == 'X' or g.result == 'O':
+                    self.sendMessage(['resultado', g.result])
+                else:
+                    print (g.result)
+                    self.sendMessage(['resultado', g.result])
+                    sys.exit()
 
 

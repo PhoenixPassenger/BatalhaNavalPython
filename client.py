@@ -29,7 +29,7 @@ class Client:
 				if self.addr[0] == ip:
 					self.connected = True
 
-		print ('conectado no ' + str(self.addr[0]))
+		print('conectado no ' + str(self.addr[0]))
 		
 
 		import game
@@ -40,11 +40,23 @@ class Client:
 
 		while data != 'gameDone': #waits for the 'gameDone' message from the correct ip
 			print ('Pera...')
-			data, self.addr = self.sock.recvfrom(2048) # buffer size is 2048 bytes
+			data, self.addr = self.sock.recvfrom(2048)
 			data = pickle.loads(data)
 			if data != '':
 				dataList = data
-				if dataList[0] == 'selectCell':
+
+				if dataList[0] == 'resultado':
+					g.clear()
+					if dataList[1] == 'X':
+						print('Hit!')
+					elif dataList[1] == 'O':
+						print('Miss!')
+					else:
+						data = 'gameDone'
+						print (dataList[1])
+						sys.exit() #Exit the application
+
+				elif dataList[0] == 'selectCell':
 					g.clear()
 					g.p2.field.field = dataList[1]
 					print('Teu campo:\n')
@@ -54,8 +66,8 @@ class Client:
 					cell = g.selectCell(g.p2)
 					self.sendMessage(['cell', cell])
 
-					while data != 'result': #waits for the 'result' message from the correct ip
-						data, self.addr = self.sock.recvfrom(1024) # buffer size is 1024 bytes
+					while data != 'resultado':
+						data, self.addr = self.sock.recvfrom(1024)
 						data = pickle.loads(data)
 						if data != '':
 							dataList = data
@@ -77,16 +89,7 @@ class Client:
 								print (g.printfield(g.p2.bombfield.field))
 					data = ''
 				
-				elif dataList[0] == 'resultado':
-					g.clear()
-					if dataList[1] == 'X':
-						print ('Hit or!')
-					elif dataList[1] == 'O':
-						print ('Miss, i guess you never miss hã!')
-					else:
-						data = 'gameDone'
-						print (dataList[1])
-						sys.exit() #Exit the application
+
 
 
 
