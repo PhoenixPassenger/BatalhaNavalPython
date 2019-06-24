@@ -169,7 +169,7 @@ class Game:
         column = ""
         row = ""
         while self.columnExist(column) == False or row not in rowlist:
-            userInput = input(player.name + ", onde (A-J)(1-10) tu quer mandar o pipoco?\n")
+            userInput = input(player.name + ", onde (A-N)(1-14) tu quer mandar o pipoco?\n")
 
             if (len(userInput) < 2):
                 column = ""
@@ -202,9 +202,9 @@ class Game:
 
     def start(self):
         while self.anythingLeft(self.p1.field.field) and self.anythingLeft(self.p2.field.field):
-            print('Your field:\n')
+            print('Teu campo:\n')
             print(self.printfield(self.p1.field.field))
-            print('\nEnemy field:\n')
+            print('\nCampo delas:\n')
             print(self.printfield(self.p1.bombfield.field))
             cell = self.selectCell(self.p1)
             self.bomb(self.p1, self.p2, cell[0], cell[1])

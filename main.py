@@ -7,7 +7,10 @@ while mode != 'l' and mode != 'n':
 
 if mode == 'l':
     import game
-
+    import pygame
+    pygame.mixer.start()
+    pygame.mixer.music.load('hom.mp3')
+    pygame.mixer.music.play(5)
     g = game.Game()
 
     g.p1 = g.newPlayer(1, g.ships[:], g.p1Field, g.p1BombField)
@@ -25,6 +28,10 @@ else:
         sc = input('[s] Server ou [c] Cliente?\n')
     if sc == 's':
         import server
+        import pygame
+        pygame.mixer.start()
+        pygame.mixer.music.load('hom.mp3')
+        pygame.mixer.music.play(5)
         s = server.Server()
         s.connect()
 
