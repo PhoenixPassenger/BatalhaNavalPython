@@ -4,7 +4,6 @@ import battlefield
 import bombfield
 import ship
 import player
-
 nth = {
     1: "primero",
     2: "segundo",
@@ -22,7 +21,7 @@ rowlist = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", 
 class Game:
 
     def clear(self):
-        print
+        os.system('cls' if os.name == 'nt' else 'clear')
 
     def __init__(self):
         self.p1 = ""
