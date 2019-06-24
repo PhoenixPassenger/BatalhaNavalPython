@@ -1,5 +1,4 @@
 import socket
-import ast
 import sys
 import pickle
 class Client:
@@ -48,9 +47,9 @@ class Client:
 				if dataList[0] == 'resultado':
 					g.clear()
 					if dataList[1] == 'X':
-						print('Hit!')
+						print('Hit or miss!')
 					elif dataList[1] == 'O':
-						print('Miss!')
+						print('I guess you never Miss,huh!')
 					else:
 						data = 'gameDone'
 						print (dataList[1])
